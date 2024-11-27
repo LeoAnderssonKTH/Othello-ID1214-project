@@ -1,9 +1,6 @@
 import pygame
-import random
-import copy
+from othello.globals import SCREEN_HEIGHT, SCREEN_WIDTH
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 1000
 
 class Othello:
     def __init__(self):
