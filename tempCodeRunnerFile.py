@@ -1,0 +1,1 @@
+pygame.quit()  # Properly quit pygame when the game finishes
