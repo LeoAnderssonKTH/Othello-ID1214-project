@@ -21,9 +21,9 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pass
                 
-        board.draw_board(SCREEN)
+        board.draw_tiles(SCREEN)
         pygame.display.update()
-        
+
     pygame.quit()  # This should be aligned with the `while run:` block
 
 main()
