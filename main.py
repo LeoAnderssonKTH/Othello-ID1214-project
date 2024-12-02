@@ -10,6 +10,7 @@ def main():
     run = True
     clock = pygame.time.Clock()
     board = Board()
+    
 
     while run:
         clock.tick(FPS)
@@ -22,6 +23,8 @@ def main():
                 pass
                 
         board.draw_tiles(SCREEN)
+        board.valid_moves(SCREEN)
+        
         pygame.display.update()
 
     pygame.quit()  # This should be aligned with the `while run:` block

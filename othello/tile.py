@@ -1,8 +1,6 @@
 import pygame
 from .globals import BLACK, WHITE, SQUARE_SIZE, GRAY
 
-
-
 class Tile:
     PADDING = 10
     OUTLINE = 2
