@@ -125,7 +125,7 @@ class Board:
 
     def check_right(self, tile, opposite_color):
         right = tile.column + 1
-        print(tile.column)
+        
 
         if right > COLUMNS - 1:
             return None
@@ -300,13 +300,17 @@ class Board:
             
             
     def make_move(self, row, col):
-        if self.blacks_turn == True:
-            self.board[row].insert(col, Tile(row, col, BLACK))
+        if self.blacks_turn:
+            # Replace the tile at (row, col) with a new black tile
+            self.board[row][col] = Tile(row, col, BLACK)
+            self.print_board()
             self.flip_tiles(row, col)
-            self.blacks_turn = False 
+            self.blacks_turn = False
         else:
-            self.board[row].insert(col, Tile(row, col, WHITE))
+            # Replace the tile at (row, col) with a new white tile
+            self.board[row][col] = Tile(row, col, WHITE)
             self.flip_tiles(row, col)
+            self.print_board()
             self.blacks_turn = True
 
     def flip_tiles(self, row, col):
@@ -320,11 +324,6 @@ class Board:
         if col != 0 and hasattr(self.board[row][col - 1], 'color'):
             self.flip_left(row, col)
 
-        print("up", hasattr(self.board[row -1][col], 'color'))
-        print("down", hasattr(self.board[row +1][col], 'color'))
-        print("left", hasattr(self.board[row][col - 1], 'color'))
-        print("right", hasattr(self.board[row][col + 1], 'color'))
-        print()
         if col != COLUMNS - 1 and hasattr(self.board[row][col + 1], 'color'):
             self.flip_right(row, col)
 

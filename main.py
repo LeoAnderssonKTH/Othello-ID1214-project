@@ -29,11 +29,12 @@ def main():
                 pos = pygame.mouse.get_pos()
                 row, col = get_mouse_pos(pos)
                 #print(valid_moves)
-                #board.print_board()
-
+            
                 # Check if the clicked position is a valid move
+               
                 if (row, col) in valid_moves:
                     board.make_move(row, col)
+                    break
 
         # Update the board display
         board.draw_tiles(SCREEN)
