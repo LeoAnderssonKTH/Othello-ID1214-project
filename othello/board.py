@@ -303,29 +303,41 @@ class Board:
         if self.blacks_turn:
             # Replace the tile at (row, col) with a new black tile
             self.board[row][col] = Tile(row, col, BLACK)
-            self.print_board()
+            #self.print_board()
             self.flip_tiles(row, col)
             self.blacks_turn = False
         else:
             # Replace the tile at (row, col) with a new white tile
             self.board[row][col] = Tile(row, col, WHITE)
             self.flip_tiles(row, col)
-            self.print_board()
+            #self.print_board()
             self.blacks_turn = True
 
     def flip_tiles(self, row, col):
         
-        if row != 0 and hasattr(self.board[row - 1][col], 'color'):
+        if row != 0 and row != 1 and hasattr(self.board[row - 1][col], 'color'):
             self.flip_up(row, col)
 
-        if row != ROWS - 1 and hasattr(self.board[row + 1][col], 'color'):
+        if row != ROWS - 1 and row != ROWS - 2 and hasattr(self.board[row + 1][col], 'color'):
             self.flip_down(row, col)
 
-        if col != 0 and hasattr(self.board[row][col - 1], 'color'):
+        if col != 0 and col != 1 and hasattr(self.board[row][col - 1], 'color'):
             self.flip_left(row, col)
 
-        if col != COLUMNS - 1 and hasattr(self.board[row][col + 1], 'color'):
+        if col != COLUMNS - 1 and col != COLUMNS - 2 and hasattr(self.board[row][col + 1], 'color'):
             self.flip_right(row, col)
+
+        if row != 0 and row != 1 and col != 0 and col != 1 and hasattr(self.board[row - 1][col - 1], 'color'):
+            self.flip_up_left(row, col)
+
+        if row != 0 and row != 1 and col != COLUMNS - 1 and col != COLUMNS - 2 and hasattr(self.board[row - 1][col + 1], 'color'):
+            self.flip_up_right(row, col)
+
+        if row != ROWS - 1 and row != ROWS - 2 and col != 0 and col != 1 and hasattr(self.board[row + 1][col - 1], 'color'):
+            self.flip_down_left(row, col)
+
+        if row != ROWS - 1 and row != ROWS - 2 and col != COLUMNS - 1 and col != COLUMNS - 2 and hasattr(self.board[row + 1][col + 1], 'color'):
+            self.flip_down_right(row, col)
 
     def flip_up(self, row, col):
         tiles_to_flip = []
@@ -342,6 +354,9 @@ class Board:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
 
+            if up == 0:
+                break
+
     def flip_down(self, row, col):
         tiles_to_flip = []
         down = row + 1
@@ -350,12 +365,15 @@ class Board:
             tiles_to_flip.append(self.board[down][col])
             #print(tiles_to_flip[0].color)
             down += 1
-            if(self.board[down][col] == 0):
+            if self.board[down][col] == 0:
                 break
             
             if self.board[down][col].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+            
+            if down == COLUMNS - 1:
+                break
 
     def flip_left(self, row, col):
         tiles_to_flip = []
@@ -365,12 +383,16 @@ class Board:
             tiles_to_flip.append(self.board[row][left])
             #print(tiles_to_flip[0].color)
             left -= 1
-            if(self.board[row][left] == 0):
+
+            if self.board[row][left] == 0:
                 break
             
             if self.board[row][left].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+
+            if left == 0:
+                break
 
     def flip_right(self, row, col):
         tiles_to_flip = []
@@ -380,12 +402,101 @@ class Board:
             tiles_to_flip.append(self.board[row][right])
             #print(tiles_to_flip[0].color)
             right += 1
-            if(self.board[row][right] == 0):
+            if self.board[row][right] == 0:
                 break
             
             if self.board[row][right].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+
+            if right == ROWS - 1:
+                break
+
+    def flip_up_left(self, row, col):
+
+        tiles_to_flip = []
+        left = col - 1
+        up = row - 1
+        
+        while self.board[up][left].color != self.board[row][col].color:
+            tiles_to_flip.append(self.board[up][left])
+            #print(tiles_to_flip[0].color)
+            left -= 1
+            up -= 1
+            if self.board[up][left] == 0:
+                break
+            
+            if self.board[up][left].color == self.board[row][col].color:
+                for tile in tiles_to_flip:
+                    tile.color = self.board[row][col].color
+
+            if left == 0 or up == 0:
+                break
+
+    def flip_up_right(self, row, col):
+
+        tiles_to_flip = []
+        right = col + 1
+        up = row - 1
+        
+        while self.board[up][right].color != self.board[row][col].color:
+            tiles_to_flip.append(self.board[up][right])
+            #print(tiles_to_flip[0].color)
+            right += 1
+            up -= 1
+
+            if(self.board[up][right] == 0):
+                break
+            
+            if self.board[up][right].color == self.board[row][col].color:
+                for tile in tiles_to_flip:
+                    tile.color = self.board[row][col].color
+
+            if right == COLUMNS - 1 or up == 0:
+                break
+            
+
+    def flip_down_left(self, row, col):
+
+        tiles_to_flip = []
+        left = col - 1
+        down = row + 1
+        
+        while self.board[down][left].color != self.board[row][col].color:
+            tiles_to_flip.append(self.board[down][left])
+            #print(tiles_to_flip[0].color)
+            left -= 1
+            down += 1
+            if(self.board[down][left] == 0):
+                break
+            
+            if self.board[down][left].color == self.board[row][col].color:
+                for tile in tiles_to_flip:
+                    tile.color = self.board[row][col].color
+
+            if left == 0 or down == ROWS - 1:
+                break
+
+    def flip_down_right(self, row, col):
+
+        tiles_to_flip = []
+        right = col + 1
+        down = row + 1
+        
+        while self.board[down][right].color != self.board[row][col].color:
+            tiles_to_flip.append(self.board[down][right])
+            #print(tiles_to_flip[0].color)
+            right += 1
+            down += 1
+            if(self.board[down][right] == 0):
+                break
+            
+            if self.board[down][right].color == self.board[row][col].color:
+                for tile in tiles_to_flip:
+                    tile.color = self.board[row][col].color
+
+            if right == COLUMNS - 1 or down == ROWS - 1:
+                break
 
     def print_board(self):
     
