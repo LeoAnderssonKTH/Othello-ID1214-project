@@ -18,10 +18,10 @@ def main():
     run = True
     clock = pygame.time.Clock()
     board = Board()
-    frame_iteration = 0 #important for teaching the bot
+    # frame_iteration = 0 # might be important for teaching the bot
     bot1 = Bot()
     bot2 = Bot()
-    valid_moves = board.valid_moves(SCREEN)
+    valid_moves = board.valid_moves(SCREEN) # initialize valid_moves
     toggle = 1
 
     while run:
@@ -34,7 +34,8 @@ def main():
         if toggle == 1:
             (row, col) = bot1.move(valid_moves)
             toggle = 2
-
+        
+        # Bot 2 moves first
         if toggle == 2:
             (row, col) = bot2.move(valid_moves)
             toggle = 1
@@ -64,6 +65,7 @@ def main():
 
         # Update the board display
         board.draw_tiles(SCREEN)
+        #frame_iterations += 1 # updates the frame iteration
         valid_moves = board.valid_moves(SCREEN)  # Re-calculate valid moves
         
         pygame.display.update()
@@ -74,11 +76,18 @@ def main():
 
             if board.black_tiles > board.white_tiles:
                 print("Black Wins!")
+                bot1.set_reward("white", 10)
+                bot2.set_reward("black", -10)
             else:
                 print("White Wins!")
+                bot2.set_reward("white", 10)
+                bot1.set_reward("black", -10)
             print("Restarting Game in 5 seconds")
-            time.sleep(5)
-            board = Board()       
+            #time.sleep(5)
+            #frame_iterations = 0 # resets the frame iterations
+            board = Board()
+            valid_moves = board.valid_moves(SCREEN)
+                   
 
     pygame.quit()
     
