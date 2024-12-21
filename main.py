@@ -42,6 +42,10 @@ def main():
         
         pygame.display.update()
 
+        if valid_moves == []:
+            print("gameover")
+
     pygame.quit()
+    
 
 main()
