@@ -21,22 +21,34 @@ def main():
     frame_iteration = 0 #important for teaching the bot
     bot1 = Bot()
     bot2 = Bot()
+    valid_moves = board.valid_moves(SCREEN)
+    toggle = 1
 
     while run:
         clock.tick(FPS)
-        valid_moves = board.valid_moves(SCREEN)
-        # Bot 1 moves first
-        # Handle events first
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+        
+        # Bot 1 moves first
+        if toggle == 1:
+            (row, col) = bot1.move(valid_moves)
+            toggle = 2
 
-            (row1, col1) = bot1.move(valid_moves)
-            if (row1, col1) in valid_moves:
-                board.make_move(row1, col1)
-                break
+        if toggle == 2:
+            (row, col) = bot2.move(valid_moves)
+            toggle = 1
+        
+        if (row, col) in valid_moves:
+            board.make_move(row, col)
+
 # ====================================================================
-#    
+#        
+#        # Handle events first
+#        for event in pygame.event.get():
+#            if event.type == pygame.QUIT:
+#                run = False
+#
 #            if event.type == pygame.MOUSEBUTTONDOWN:
 #                pos = pygame.mouse.get_pos()
 #                row, col = get_mouse_pos(pos)
@@ -66,8 +78,7 @@ def main():
                 print("White Wins!")
             print("Restarting Game in 5 seconds")
             time.sleep(5)
-            board = Board()
-            
+            board = Board()       
 
     pygame.quit()
     
