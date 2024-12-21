@@ -303,12 +303,14 @@ class Board:
         if self.blacks_turn:
             # Replace the tile at (row, col) with a new black tile
             self.board[row][col] = Tile(row, col, BLACK)
+            self.black_tiles += 1
             #self.print_board()
             self.flip_tiles(row, col)
             self.blacks_turn = False
         else:
             # Replace the tile at (row, col) with a new white tile
             self.board[row][col] = Tile(row, col, WHITE)
+            self.white_tiles += 1
             self.flip_tiles(row, col)
             #self.print_board()
             self.blacks_turn = True
@@ -342,6 +344,7 @@ class Board:
     def flip_up(self, row, col):
         tiles_to_flip = []
         up = row - 1
+
         
         while self.board[up][col].color != self.board[row][col].color:
             tiles_to_flip.append(self.board[up][col])
@@ -353,6 +356,12 @@ class Board:
             if self.board[up][col].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if up == 0:
                 break
@@ -371,6 +380,12 @@ class Board:
             if self.board[down][col].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
             
             if down == COLUMNS - 1:
                 break
@@ -390,6 +405,12 @@ class Board:
             if self.board[row][left].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if left == 0:
                 break
@@ -408,6 +429,12 @@ class Board:
             if self.board[row][right].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if right == ROWS - 1:
                 break
@@ -429,6 +456,12 @@ class Board:
             if self.board[up][left].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if left == 0 or up == 0:
                 break
@@ -451,6 +484,12 @@ class Board:
             if self.board[up][right].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if right == COLUMNS - 1 or up == 0:
                 break
@@ -473,6 +512,12 @@ class Board:
             if self.board[down][left].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if left == 0 or down == ROWS - 1:
                 break
@@ -494,6 +539,12 @@ class Board:
             if self.board[down][right].color == self.board[row][col].color:
                 for tile in tiles_to_flip:
                     tile.color = self.board[row][col].color
+                    if self.board[row][col].color == (0, 0, 0):
+                        self.black_tiles += 1
+                        self.white_tiles -= 1
+                    else:
+                        self.black_tiles -= 1
+                        self.white_tiles += 1
 
             if right == COLUMNS - 1 or down == ROWS - 1:
                 break

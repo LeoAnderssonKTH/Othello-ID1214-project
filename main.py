@@ -3,6 +3,7 @@ from othello.globals import SCREEN_WIDTH, SCREEN_HEIGHT, SQUARE_SIZE
 from othello.board import Board
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Othello')
+import time
 
 FPS = 5
 
@@ -26,6 +27,7 @@ def main():
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                
                 pos = pygame.mouse.get_pos()
                 row, col = get_mouse_pos(pos)
                 #print(valid_moves)
@@ -43,7 +45,17 @@ def main():
         pygame.display.update()
 
         if valid_moves == []:
-            print("gameover")
+            print("Black Tiles: ", board.black_tiles)
+            print("White Tiles: ", board.white_tiles)
+
+            if board.black_tiles > board.white_tiles:
+                print("Black Wins!")
+            else:
+                print("White Wins!")
+            print("Restarting Game in 5 seconds")
+            time.sleep(5)
+            board = Board()
+            
 
     pygame.quit()
     
