@@ -264,7 +264,7 @@ class Board:
         if possible_moves:
             return possible_moves
 
-    def valid_moves(self, screen):
+    def valid_moves(self):
         valid_moves = []
 
         if self.blacks_turn == True:
@@ -282,8 +282,9 @@ class Board:
         
         if valid_moves:
             valid_moves = [item for sublist in valid_moves for item in sublist] #collapses the earlier valid_moves
+            valid_moves = list(set(valid_moves))
             #print(valid_moves)
-            self.print_moves(valid_moves, screen)
+            
         
         return valid_moves
 
@@ -562,6 +563,23 @@ class Board:
                 
         print()
 
+    def current_state(self):
+        current_state = []
+
+        for row in self.board:
+            current_row = []
+            for tile in row:
+                if tile == 0:
+                    current_row.append(0) 
+                elif tile.color == BLACK:
+                    current_row.append(1)  
+                else:
+                    current_row.append(-1)  
+            current_state.append(current_row)
+
+        return current_state
+
+
 
         
             
@@ -570,3 +588,4 @@ class Board:
                         
 
 
+ 

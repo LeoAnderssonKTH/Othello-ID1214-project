@@ -6,7 +6,7 @@ SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Othello')
 import time
 
-FPS = 5
+FPS = 1
 
 def get_mouse_pos(pos):
     x, y = pos
@@ -19,9 +19,9 @@ def main():
     clock = pygame.time.Clock()
     board = Board()
     # frame_iteration = 0 # might be important for teaching the bot
-    bot1 = Bot()
-    bot2 = Bot()
-    valid_moves = board.valid_moves(SCREEN) # initialize valid_moves
+    bot1 = Bot("Black")
+    bot2 = Bot("White")
+    valid_moves = board.valid_moves() # initialize valid_moves
     toggle = 1
 
     while run:
@@ -32,16 +32,16 @@ def main():
         
         # Bot 1 moves first
         if toggle == 1:
-            (row, col) = bot1.move(valid_moves)
+            move = bot1.get_move(valid_moves)
+            bot1.move(move, board)
             toggle = 2
         
         # Bot 2 moves first
         if toggle == 2:
-            (row, col) = bot2.move(valid_moves)
+            move = bot2.get_move(valid_moves)
+            bot2.move(move, board)
             toggle = 1
         
-        if (row, col) in valid_moves:
-            board.make_move(row, col)
 
 # ====================================================================
 #        
@@ -66,7 +66,12 @@ def main():
         # Update the board display
         board.draw_tiles(SCREEN)
         #frame_iterations += 1 # updates the frame iteration
-        valid_moves = board.valid_moves(SCREEN)  # Re-calculate valid moves
+        valid_moves = board.valid_moves()  # Re-calculate valid moves
+        board.print_moves(valid_moves, SCREEN)
+        print(valid_moves)
+        current_state = board.current_state()
+        #print(current_state)
+        #print()
         
         pygame.display.update()
 
@@ -86,7 +91,8 @@ def main():
             #time.sleep(5)
             #frame_iterations = 0 # resets the frame iterations
             board = Board()
-            valid_moves = board.valid_moves(SCREEN)
+            valid_moves = board.valid_moves()
+            board.print_moves(valid_moves, SCREEN)
                    
 
     pygame.quit()
