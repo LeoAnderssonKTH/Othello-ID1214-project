@@ -29,20 +29,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
+        current_state = board.current_state()
         
         # Bot 1 moves first
-        if toggle == 1:
-            move = bot1.get_move(valid_moves)
+        if board.blacks_turn:
+            move = bot1.get_move(valid_moves, current_state)
             bot1.move(move, board)
-            toggle = 2
-
-        # Bot 2 moves second
-        if toggle == 2:
-            move = bot2.get_move(valid_moves)
+        else:
+            move = bot2.get_move(valid_moves, current_state)
             bot2.move(move, board)
-            toggle = 1
         
-
+        
+        
 # ====================================================================
 #        
 #        # Handle events first
@@ -72,8 +71,11 @@ def main():
         current_state = board.current_state()
         #print(current_state)
         #print()
+
+        
         
         pygame.display.update()
+        time.sleep(2)
 
         if valid_moves == []:
             print("Black Tiles: ", board.black_tiles)
