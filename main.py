@@ -35,8 +35,8 @@ def main():
             move = bot1.get_move(valid_moves)
             bot1.move(move, board)
             toggle = 2
-        
-        # Bot 2 moves first
+
+        # Bot 2 moves second
         if toggle == 2:
             move = bot2.get_move(valid_moves)
             bot2.move(move, board)
