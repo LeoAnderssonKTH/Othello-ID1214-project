@@ -152,15 +152,22 @@ def train_bot():
 
         if game_over:
             # train long memory, plot result
+            #board = Board()
+            black_score = board.black_tiles
+            white_score = board.white_tiles
+
             board = Board()#resets board
             agent_black.game_iterations += 1
             agent_black.long_memory_training()#trains the bot's long memory
             agent_white.game_iterations += 1
             agent_white.long_memory_training()#trains the bot's long memory
 
-            if score > record:
-                record = score
+            if black_score > record_black:
+                record_black = black_score
                 # agent.model.save()
+
+            if white_score > record_white:
+                record_white = white_score
 
             print('Game:', agent.game_iterations, 'Score:', score, 'Record:', record)
 
