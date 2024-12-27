@@ -35,20 +35,20 @@ class Bot:
         pass
 
     def move_heuristics(self, move):
-
-        if move in [(0, 0), (0, 7), (7, 0), (7, 7)]:
+        if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
             return 100
+        elif (move[0] == 0 or move[0] == 7) or (move[1] == 0 or move[1] == 7):
+            return 50
         else:
             return 1
 
-    def get_move(self, valid_moves, state):
-
+    def get_move(self, valid_moves):
         next_move = None
-        best_score = -float('inf')
+        best_score = 0 #-float('inf')
 
-        
         for move in valid_moves:
             move_score = self.move_heuristics(move)
+            print("move_score: ", move_score)
             if move_score > best_score:
                 best_score = move_score
                 next_move = move  
@@ -61,13 +61,10 @@ class Bot:
 
     # play(action) -> move
     def move(self, move, board):
-
         old_score = 0
         row, col = move
         reward = 0
         score = 0
-        
-        
 
         if self.color == "Black":
             old_score = board.black_tiles
@@ -76,16 +73,18 @@ class Bot:
         
         board.make_move(row, col)
 
-        if self.color == "Black":
-            reward += board.black_tiles - old_score
-        else:
-            reward += board.white_tiles - old_score
+        if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
+            reward += 10
 
-        if self.color == "Black":
-            score = board.black_tiles - board.white_tiles
-        else:
-            score = board.white_tiles - board.black_tiles
-        
+        #if self.color == "Black":
+        #    reward += board.black_tiles - old_score
+        #else:
+        #    reward += board.white_tiles - old_score
+
+        #if self.color == "Black":
+        #    score = board.black_tiles - board.white_tiles
+        #else:
+        #    score = board.white_tiles - board.black_tiles
         
         return reward, score
 
