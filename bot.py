@@ -2,6 +2,7 @@ from collections import deque # where we store data
 from othello.board import Board
 import random
 import numpy as np
+from model import QNetwork, QTrainer
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -11,10 +12,12 @@ class Bot:
     def __init__(self, color):
         self.game_iterations = 0
         self.epsilon = 0 # in oder to controll randomness
-        self.reward = 0
+        self.reward = 0.9
         self.color = color
         self.gamma = 0 #discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
+        self.model = QNetwork(64, 128, 60)
+        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     
     def get_board_state(self, board):
         nr_white_tiles = board.white_tiles
@@ -29,7 +32,10 @@ class Bot:
         self.memory.append((board_state, move, reward, next_board_state, game_over))
 
     def bot_trainer_long_memory(self):
-        pass
+        if len(self.memory) > BATCH_SIZE:
+            sample = random.sample(self.memory, BATCH_SIZE)
+        else:
+            sample = self.memory
 
     def bot_trainer_short_memory(self, board_state, move, reward, next_board_state, game_over):
         pass
@@ -73,9 +79,6 @@ class Bot:
         
         board.make_move(row, col)
 
-        if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
-            reward += 10
-
         #if self.color == "Black":
         #    reward += board.black_tiles - old_score
         #else:
@@ -85,8 +88,8 @@ class Bot:
         #    score = board.black_tiles - board.white_tiles
         #else:
         #    score = board.white_tiles - board.black_tiles
-        
-        return reward, score
+
+        return reward
 
 
     def set_reward(self, color, value):
@@ -116,7 +119,7 @@ def train_bot():
             final_move = agent_black.get_move(state_old, valid_moves)
 
             # perform move and get new state
-            reward, score = agent_black.move(final_move, board)
+            reward = agent_black.move(final_move, board)
             state_new = agent_black.get_board_state(board)
 
             #Check if game is over
@@ -153,6 +156,9 @@ def train_bot():
             black_score = board.black_tiles
             white_score = board.white_tiles
 
+            black_reward = 0
+            white_reward = 0
+
             board = Board()
             agent_black.game_iterations += 1
             agent_black.bot_trainer_long_memory()
@@ -166,7 +172,15 @@ def train_bot():
             if white_score > record_white:
                 record_white = white_score
 
-            print('Game:', agent.game_iterations, 'Score:', score, 'Record:', record)
+            if black_score > white_score:
+                black_reward = 1
+                white_reward = -1
+            
+            if white_score > black_score:
+                white_reward = 1
+                black_reward = -1
+
+            #print('Game:', agent.game_iterations, 'Score:', score, 'Record:', record)
 
             # TODO: plot
 
