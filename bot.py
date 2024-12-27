@@ -36,7 +36,7 @@ class Bot:
 
     def move_heuristics(self, move):
 
-        if move == (0, 0) or (0, 7) or (7, 0) or (7, 7):
+        if move in [(0, 0), (0, 7), (7, 0), (7, 7)]:
             return 100
         else:
             return 1
@@ -151,15 +151,21 @@ def train_bot():
 
         if game_over:
             # train long memory, plot result
+            black_score = board.black_tiles
+            white_score = board.white_tiles
+
             board = Board()
             agent_black.game_iterations += 1
             agent_black.bot_trainer_long_memory()
             agent_white.game_iterations += 1
             agent_white.bot_trainer_long_memory()
 
-            if score > record:
-                record = score
+            if black_score > record_black:
+                record_black = black_score
                 # agent.model.save()
+
+            if white_score > record_white:
+                record_white = white_score
 
             print('Game:', agent.game_iterations, 'Score:', score, 'Record:', record)
 
