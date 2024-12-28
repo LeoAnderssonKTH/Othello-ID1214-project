@@ -1,7 +1,7 @@
 import pygame
 from othello.globals import SCREEN_WIDTH, SCREEN_HEIGHT, SQUARE_SIZE
 from othello.board import Board
-from bot import Bot
+from bot import Bot, train_bot
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Othello')
 import time
@@ -17,12 +17,16 @@ def get_mouse_pos(pos):
 def main():
     run = True
     clock = pygame.time.Clock()
-    board = Board()
+    #board = Board()
+    #print("Starting Board: ")
+    #print(board.current_state)
     # frame_iteration = 0 # might be important for teaching the bot
-    bot1 = Bot("Black")
-    bot2 = Bot("White")
-    valid_moves = board.valid_moves() # initialize valid_moves
-    toggle = 1
+    #bot1 = Bot("Black")
+    #bot2 = Bot("White")
+    #valid_moves = board.valid_moves() # initialize valid_moves
+    #toggle = 1
+
+    train_bot(SCREEN)
 
     while run:
         clock.tick(FPS)
@@ -30,15 +34,15 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        current_state = board.current_state()
+        #current_state = board.current_state()
         
         # Bot 1 moves first
-        if board.blacks_turn:
-            move = bot1.get_move(valid_moves, current_state)
-            bot1.move(move, board)
-        else:
-            move = bot2.get_move(valid_moves, current_state)
-            bot2.move(move, board)
+        #if board.blacks_turn:
+            #move = bot1.get_move(valid_moves, current_state)
+            #bot1.move(move, board)
+        #else:
+            #move = bot2.get_move(valid_moves, current_state)
+            #bot2.move(move, board)
         
         
         
@@ -72,9 +76,6 @@ def main():
         #print(current_state)
         #print()
 
-        
-        
-        pygame.display.update()
         time.sleep(2)
 
         if valid_moves == []:

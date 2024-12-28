@@ -38,8 +38,8 @@ class Board:
                     self.board[row].append(Tile(row, col, WHITE))
                 else:
                     self.board[row].append(0)
-            else:
-                self.board[row].append(0) 
+
+            
 
     def draw_tiles(self, screen):
         self.draw_board(screen)
@@ -578,6 +578,7 @@ class Board:
             current_state.append(current_row)
 
         return current_state
+
 
 
 
