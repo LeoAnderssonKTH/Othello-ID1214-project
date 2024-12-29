@@ -14,12 +14,12 @@ LR = 0.001
 class Bot:
     def __init__(self, color):
         self.game_iterations = 0
-        self.epsilon = 0 # in oder to controll randomness
+        self.epsilon = 100 # in oder to controll randomness
         self.reward = 0.9
         self.color = color
-        self.gamma = 0 #discount rate
+        self.gamma = 0.9 #discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
-        self.model = QNetwork(64, 128, 64)
+        self.model = QNetwork(64, 256, 64)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         #self.model = Linear_QNet(11,256,3)
         #self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -60,51 +60,51 @@ class Bot:
     def get_move(self, state, valid_moves, board):
         next_move = None
         best_score = -float('inf')
-        print(state)
+        #print(state)
 
         
-        for move in valid_moves:
-            move_score = self.move_heuristics(move)
-            if move_score > best_score:
-                best_score = move_score
-                next_move = move  
+        #for move in valid_moves:
+         #   move_score = self.move_heuristics(move)
+         #   if move_score > best_score:
+         #       best_score = move_score
+         #       next_move = move  
 
         # If a move is found in one of the corners, return it immediately
-        if next_move in [(0, 0), (0, 7), (7, 0), (7, 7)]:
-            return next_move
-        else:
+        #if next_move in [(0, 0), (0, 7), (7, 0), (7, 7)]:
+           # return next_move
+        #else:
             # If no corners found use model to decide move
-            best_score = -float('inf')
+        #best_score = -float('inf')
 
-            for move in valid_moves:
-                # Deep copy the board to simulate the move
-                board_copy = copy.deepcopy(board)
-                row, col = move
-                board_copy.make_move(row, col)
+        for move in valid_moves:
+            # Deep copy the board to simulate the move
+            board_copy = copy.deepcopy(board)
+            row, col = move
+            board_copy.make_move(row, col)
 
-                # Get the new state of the board after the move
-                new_state = board_copy.current_state()
+            # Get the new state of the board after the move
+            new_state = board_copy.current_state()
 
-                # Convert the board state to a 1D tensor
-                flattened_state = [tile for row in new_state for tile in row]
+            # Convert the board state to 1D tensor so it can be passed to the model
+            flattened_state = [tile for row in new_state for tile in row]
 
-                state_tensor = torch.tensor(flattened_state, dtype=torch.float32).unsqueeze(0)  # Add batch dimension (1, 64)
+            state_tensor = torch.tensor(flattened_state, dtype=torch.float32).unsqueeze(0) 
 
-                # Get Q-values from the model (model should output Q-values for all possible moves)
-                q_values = self.model(state_tensor)
+            # Get Q-values from the model (model should output Q-values for all possible moves)
+            q_values = self.model(state_tensor)
 
-                # Get valid move indices in the flattened board representation
-                valid_indices = [move[0] * 8 + move[1] for move in valid_moves]
+            # Get valid move indices in the flattened board representation
+            valid_indices = [move[0] * 8 + move[1] for move in valid_moves]
 
-                # Filter Q-values for valid moves
-                valid_q_values = q_values[0][valid_indices]
+            # Filter Q-values for valid moves
+            valid_q_values = q_values[0][valid_indices]
 
-                # Match each valid move to its Q-value
-                for move, q_value in zip(valid_moves, valid_q_values):
-                    move_score = q_value.item()
-                    if move_score > best_score:
-                        best_score = move_score
-                        next_move = move
+            # Match each valid move to its Q-value
+            for move, q_value in zip(valid_moves, valid_q_values):
+                move_score = q_value.item()
+                if move_score > best_score:
+                    best_score = move_score
+                    next_move = move
 
         return next_move
 
@@ -126,60 +126,62 @@ class Bot:
         board.make_move(row, col)
 
         if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
-            reward += 10
+            reward += 20
  #       elif move[0] == 0 or move[0] == 7 or move[1] == 0 or move[1] == 7:
   #          reward += 5
         #lägg till så den koller för mest flippade movet också
    #     else:
     #        reward -= 2
 
-        #if self.color == "Black":
-        #    reward += board.black_tiles - old_score
-        #else:
-        #    reward += board.white_tiles - old_score
+        if self.color == "Black":
+            reward += board.black_tiles - old_score
+        else:
+            reward += board.white_tiles - old_score
 
         #if self.color == "Black":
-        #    score = board.black_tiles - board.white_tiles
+            #score = board.black_tiles - board.white_tiles
         #else:
-        #    score = board.white_tiles - board.black_tiles
+            #score = board.white_tiles - board.black_tiles
         
         return reward
 
 
     def set_reward(self, color, value):
         self.reward = value
-        print(color + " reward: " + str(self.reward))
+        #print(color + " reward: " + str(self.reward))
 
-def train_bot(screen):
+def train_bot():
     scores_black = [] # for plotting progress
     scores_white = [] # for plotting progress
+
+    black_won_last = False
     
     
     record_black = 0
     record_white = 0
-    FPS = 1
+    FPS = 500
 
     agent_black = Bot("Black")
     agent_white = Bot("White")
     board = Board()
     game_over = False
-    clock = pygame.time.Clock()
+    #clock = pygame.time.Clock()
     run = True
 
     while run:
 
-        clock.tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
+        #clock.tick(FPS)
+        #for event in pygame.event.get():
+            #if event.type == pygame.QUIT:
+                #run = False
         
-        board.draw_tiles(screen)
+        #board.draw_tiles(screen)
         # get old state
         state_old = board.current_state()
 
         # get move
         valid_moves = board.valid_moves()
-        board.print_moves(valid_moves, screen)
+        #board.print_moves(valid_moves, screen)
 
         if board.blacks_turn:
             final_move = agent_black.get_move(state_old, valid_moves, board)
@@ -217,39 +219,57 @@ def train_bot(screen):
             # remember
             agent_white.remember(state_old, final_move, reward, state_new, game_over)
 
-        pygame.display.update()
+        #pygame.display.update()
 
         if game_over:
-            # train long memory, plot result
+          
             black_score = board.black_tiles
             white_score = board.white_tiles
 
             black_reward = 0
             white_reward = 0
 
-            game_over = False
-            board = Board()
-            pygame.display.update()
-           
+
+            if black_score > record_black:
+                record_black = black_score
+                agent_black.model.save("black_bot")
+
+            if white_score > record_white:
+                record_white = white_score
+                agent_white.model.save("white_bot")
+
+            if black_score > white_score:
+                black_reward = 100
+                white_reward = -100
+                if black_won_last == False:
+                    agent_black.model.save("black_bot")
+                    black_won_last = True
+
+                print("BLACK WINS!")
+            
+            if white_score > black_score:
+                white_reward = 100
+                black_reward = -100
+                if black_won_last == True:
+                    agent_white.model.save("white_bot")
+                    black_won_last = False
+                
+                print("WHITE WINS")
+
+            agent_black.remember(state_old, final_move, black_reward, state_new, game_over)
+            agent_white.remember(state_old, final_move, white_reward, state_new, game_over)
+
             agent_black.game_iterations += 1
             agent_black.bot_trainer_long_memory()
             agent_white.game_iterations += 1
             agent_white.bot_trainer_long_memory()
 
-            if black_score > record_black:
-                record_black = black_score
-                # agent.model.save()
+            agent_black.epsilon = max(0.01, agent_black.epsilon * 0.995)  # Exponential decay
+            agent_white.epsilon = max(0.01, agent_white.epsilon * 0.995)
 
-            if white_score > record_white:
-                record_white = white_score
-
-            if black_score > white_score:
-                black_reward = 1
-                white_reward = -1
-            
-            if white_score > black_score:
-                white_reward = 1
-                black_reward = -1
+            game_over = False
+            board = Board()
+            #pygame.display.update()
 
             
 

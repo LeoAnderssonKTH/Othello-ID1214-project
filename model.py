@@ -18,8 +18,6 @@ class QNetwork(nn.Module):
     
     def save(self, file_name='model.pth'):
         model_folder_path = './model'
-        model_folder_path += '/'
-        model_folder_path += self.color
         
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
@@ -76,7 +74,7 @@ class QTrainer:
         
         self.optimizer.zero_grad()  
         loss = self.criterion(target, pred)  
-        print(f"Training Loss: {loss.item()}")
+        #print(f"Training Loss: {loss.item()}")
         loss.backward() 
 
         self.optimizer.step() 
