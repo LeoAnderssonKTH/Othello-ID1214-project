@@ -12,21 +12,12 @@ class Bot:
     def __init__(self, color):
         self.game_iterations = 0
         self.epsilon = 0 # in oder to controll randomness
-<<<<<<< HEAD
         self.reward = 0.9
         self.color = color
         self.gamma = 0 #discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
-        self.model = QNetwork(64, 128, 60)
-        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-=======
-        #self.reward = 0
-        self.color = color
-        self.gamma = 0 #discount rate
-        self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
-        #self.model = Linear_QNet(11,256,3)
+        #self.model = QNetwork(64, 128, 60)
         #self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
->>>>>>> 527337fd5fc3ec8b66e477a5f079e35c10d81a18
     
     #def get_board(self, board):
         #nr_white_tiles = board.white_tiles
@@ -39,17 +30,10 @@ class Bot:
     def add_move_to_memory(self, current_board, move, reward, next_board, game_over):
         self.memory.append((current_board, move, reward, next_board, game_over))
 
-<<<<<<< HEAD
-    def bot_trainer_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            sample = random.sample(self.memory, BATCH_SIZE)
-        else:
-=======
     def long_memory_training(self):
         if self.memory > BATCH_SIZE:
             sample = random.sample(self.memory, BATCH_SIZE)
         else: 
->>>>>>> 527337fd5fc3ec8b66e477a5f079e35c10d81a18
             sample = self.memory
 
         boards, moves, rewards, next_boards, game_overs = zip(*sample) #unzipps sample data
@@ -98,8 +82,6 @@ class Bot:
         
         board.make_move(row, col)
 
-<<<<<<< HEAD
-=======
         if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
             reward += 10
         elif move[0] == 0 or move[0] == 7 or move[1] == 0 or move[1] == 7:
@@ -108,7 +90,6 @@ class Bot:
         else:
             reward -= 2
 
->>>>>>> 527337fd5fc3ec8b66e477a5f079e35c10d81a18
         #if self.color == "Black":
         #    reward += board.black_tiles - old_score
         #else:
@@ -143,25 +124,13 @@ def train_bot():
         valid_moves = board.valid_moves
 
         if board.blacks_turn:
-<<<<<<< HEAD
-            final_move = agent_black.get_move(state_old, valid_moves)
-
-            # perform move and get new state
-            reward = agent_black.move(final_move, board)
-            state_new = agent_black.get_board_state(board)
-
-            #Check if game is over
-            valid_moves = board.valid_moves()
-            if valid_moves == []:
-=======
             final_move = agent_black.get_move(valid_moves)#gets a move based on heuristics
-            reward, score = agent_black.move(final_move, board)#makes a move and gets the reward and score from the move made
+            reward = agent_black.move(final_move, board)#makes a move and gets the reward and score from the move made
             #next_board = agent_black.get_board(board)
             next_board = board.current_state()#gets updates board after move
             
             valid_moves = board.valid_moves()#updates valid_moves after bot's move
             if valid_moves == []:#checks if game is over
->>>>>>> 527337fd5fc3ec8b66e477a5f079e35c10d81a18
                 game_over = True
 
             #trains short memory and adds the move to the memory
@@ -188,14 +157,10 @@ def train_bot():
             black_score = board.black_tiles
             white_score = board.white_tiles
 
-<<<<<<< HEAD
             black_reward = 0
             white_reward = 0
 
-            board = Board()
-=======
             board = Board()#resets board
->>>>>>> 527337fd5fc3ec8b66e477a5f079e35c10d81a18
             agent_black.game_iterations += 1
             agent_black.long_memory_training()#trains the bot's long memory
             agent_white.game_iterations += 1
@@ -222,7 +187,3 @@ def train_bot():
 
 #if __name__ == '__main__':
 #    train_bot()
-
-class Model:
-    def __init__(self):
-        pass
