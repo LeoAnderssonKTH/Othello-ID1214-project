@@ -21,14 +21,6 @@ class Bot:
         self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
         self.model = QNetwork(64, 256, 64)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-    
-    #def get_board(self, board):
-        #nr_white_tiles = board.white_tiles
-        #nr_black_tiles = board.black_tiles
-        #current_board = board.current_state()
-        #return current_board
-        # valid moves
-        # current board
 
     def remember(self, board_state, move, reward, next_board_state, game_over):
         self.memory.append((board_state, move, reward, next_board_state, game_over))
@@ -53,14 +45,11 @@ class Bot:
         else:
             return 1
 
-
-
     def get_move(self, state, valid_moves, board):
         next_move = None
         best_score = -float('inf')
         #print(state)
 
-        
         #for move in valid_moves:
          #   move_score = self.move_heuristics(move)
          #   if move_score > best_score:
@@ -138,7 +127,6 @@ class Bot:
             #score = board.white_tiles - board.black_tiles
         
         return reward
-
 
     def set_reward(self, color, value):
         self.reward = value
