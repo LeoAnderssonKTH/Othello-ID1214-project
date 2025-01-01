@@ -42,7 +42,7 @@ class Bot:
         self.memory.append((board_state, move, reward, next_board_state, game_over))
 
     def long_memory_trainer(self):
-        if self.memory > BATCH_SIZE:
+        if len(self.memory) > BATCH_SIZE:
             sample = random.sample(self.memory, BATCH_SIZE)
         else: 
             sample = self.memory
@@ -127,8 +127,8 @@ class Bot:
         
         board.make_move(row, col)
 
-        #if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
-            #reward += 20
+        if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
+            reward += 10
  #       elif move[0] == 0 or move[0] == 7 or move[1] == 0 or move[1] == 7:
   #          reward += 5
         #lägg till så den koller för mest flippade movet också
@@ -201,7 +201,14 @@ def train_bot():
             if valid_moves == []:#checks if game is over
                 game_over = True
 
-            agent_black.bot_trainer_short_memory(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
+            #Check if we leave a corner open
+            corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+            for corner in corners:
+                if corner in valid_moves:
+                    reward = -10
+                    break
+
+            agent_black.short_memory_trainer(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
             agent_black.remember(old_board, final_move, reward, next_board, game_over)#appends the game state, bot move and reward to memory
 
         else:
@@ -214,7 +221,14 @@ def train_bot():
             if valid_moves == []:
                 game_over = True
 
-            agent_white.bot_trainer_short_memory(old_board, final_move, reward, next_board, game_over)
+            #Check if we leave a corner open
+            corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+            for corner in corners:
+                if corner in valid_moves:
+                    reward = -10
+                    break
+
+            agent_white.short_memory_trainer(old_board, final_move, reward, next_board, game_over)
             agent_white.remember(old_board, final_move, reward, next_board, game_over)
 
         #pygame.display.update()
@@ -263,7 +277,7 @@ def train_bot():
                 agent_white.memory[-1] = (board_state, move, 100, next_board_state, game_over)
 
                 if black_won_last == True:
-                    agent_white.model.save("    white_bot_v2")
+                    agent_white.model.save("white_bot_v2")
                     black_won_last = False
                 
                 #print("WHITE WINS")
