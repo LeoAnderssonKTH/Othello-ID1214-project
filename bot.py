@@ -41,16 +41,16 @@ class Bot:
     def remember(self, board_state, move, reward, next_board_state, game_over):
         self.memory.append((board_state, move, reward, next_board_state, game_over))
 
-    def bot_trainer_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
+    def long_memory_trainer(self):
+        if self.memory > BATCH_SIZE:
             sample = random.sample(self.memory, BATCH_SIZE)
-        else:
+        else: 
             sample = self.memory
 
         boards, moves, rewards, next_boards, game_overs = zip(*sample) #unzipps sample data
         self.trainer.train_step(boards, moves, rewards, next_boards, game_overs)
 
-    def bot_trainer_short_memory(self, board_state, move, reward, next_board_state, game_over):
+    def short_memory_trainer(self, board_state, move, reward, next_board_state, game_over):
         self.trainer.train_step(board_state, move, reward, next_board_state, game_over)
 
     def move_heuristics(self, move):
@@ -114,10 +114,6 @@ class Bot:
 
         return next_move
 
-
-            
-
-    # play(action) -> move
     def move(self, move, board):
         old_score = 0
         row, col = move
@@ -161,8 +157,7 @@ def train_bot():
     scores_white = [] # for plotting progress
 
     black_won_last = False
-    
-    
+
     record_black = 0
     record_white = 0
     FPS = 500
@@ -184,7 +179,6 @@ def train_bot():
     run = True
 
     while run:
-
         #clock.tick(FPS)
         #for event in pygame.event.get():
             #if event.type == pygame.QUIT:
@@ -192,47 +186,36 @@ def train_bot():
         
         #board.draw_tiles(screen)
         # get old state
-        state_old = board.current_state()
+        old_board = board.current_state()
 
         # get move
         valid_moves = board.valid_moves()
         #board.print_moves(valid_moves, screen)
 
         if board.blacks_turn:
-            final_move = agent_black.get_move(state_old, valid_moves, board)
-
-            # perform move and get new state
-            reward = agent_black.move(final_move, board)
-            state_new = board.current_state()
-
-            #Check if game is over
-            valid_moves = board.valid_moves()
-            if valid_moves == []:
+            final_move = agent_black.get_move(old_board, valid_moves, board)#gets a move based on heuristics
+            reward = agent_black.move(final_move, board)#makes a move and gets the reward and score from the move made
+            next_board = board.current_state()#gets updates board after move
+            
+            valid_moves = board.valid_moves()#updates valid_moves after bot's move
+            if valid_moves == []:#checks if game is over
                 game_over = True
 
-            # train short memory
-            agent_black.bot_trainer_short_memory(state_old, final_move, reward, state_new, game_over)
-
-            # remember
-            agent_black.remember(state_old, final_move, reward, state_new, game_over)
+            agent_black.bot_trainer_short_memory(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
+            agent_black.remember(old_board, final_move, reward, next_board, game_over)#appends the game state, bot move and reward to memory
 
         else:
-            final_move = agent_white.get_move(state_old, valid_moves, board)
-
-            # perform move and get new state
+            #same thing as above but with the white player instead of black
+            final_move = agent_white.get_move(old_board, valid_moves, board)
             reward = agent_white.move(final_move, board)
-            state_new = board.current_state()
+            next_board = board.current_state()
 
-            #Check if game is over
             valid_moves = board.valid_moves()
             if valid_moves == []:
                 game_over = True
 
-            # train short memory
-            agent_white.bot_trainer_short_memory(state_old, final_move, reward, state_new, game_over)
-
-            # remember
-            agent_white.remember(state_old, final_move, reward, state_new, game_over)
+            agent_white.bot_trainer_short_memory(old_board, final_move, reward, next_board, game_over)
+            agent_white.remember(old_board, final_move, reward, next_board, game_over)
 
         #pygame.display.update()
 
@@ -299,9 +282,9 @@ def train_bot():
                 #print("DRAW")
 
             agent_black.game_iterations += 1
-            agent_black.bot_trainer_long_memory()
+            agent_black.long_memory_trainer()
             agent_white.game_iterations += 1
-            agent_white.bot_trainer_long_memory()
+            agent_white.long_memory_trainer()
 
             agent_black.epsilon = max(0.01, agent_black.epsilon * 0.995)  # Exponential decay
             agent_white.epsilon = max(0.01, agent_white.epsilon * 0.995)
@@ -317,8 +300,6 @@ def train_bot():
                 print("Black Wins: ", black_wins)
                 print("White Wins: ", white_wins)
                 print("Draws: ", draws)
-
-            
 
             
 
