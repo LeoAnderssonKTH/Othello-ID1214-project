@@ -19,14 +19,18 @@ class Bot:
         self.color = color
         self.gamma = 0.9 #discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
-        self.model = QNetwork(64, 256, 64)
+        self.model = QNetwork(64, 128, 128, 64)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+
+    def load_model(self, path):
+        self.model.load_state_dict(torch.load(path))
+        
 
     def remember(self, board_state, move, reward, next_board_state, game_over):
         self.memory.append((board_state, move, reward, next_board_state, game_over))
 
     def long_memory_trainer(self):
-        if self.memory > BATCH_SIZE:
+        if len(self.memory) > BATCH_SIZE:
             sample = random.sample(self.memory, BATCH_SIZE)
         else: 
             sample = self.memory
@@ -51,17 +55,17 @@ class Bot:
         #print(state)
 
         #for move in valid_moves:
-         #   move_score = self.move_heuristics(move)
-         #   if move_score > best_score:
-         #       best_score = move_score
-         #       next_move = move  
+            #move_score = self.move_heuristics(move)
+            #if move_score > best_score:
+             #   best_score = move_score
+              #  next_move = move  
 
-        # If a move is found in one of the corners, return it immediately
+        #If a move is found in one of the corners, return it immediately
         #if next_move in [(0, 0), (0, 7), (7, 0), (7, 7)]:
            # return next_move
         #else:
             # If no corners found use model to decide move
-        #best_score = -float('inf')
+           # best_score = -float('inf')
 
         for move in valid_moves:
             # Deep copy the board to simulate the move
@@ -109,17 +113,17 @@ class Bot:
         board.make_move(row, col)
 
         if move == (0, 0) or move == (0, 7) or move == (7, 0) or move == (7, 7):
-            reward += 20
+            reward += 10
  #       elif move[0] == 0 or move[0] == 7 or move[1] == 0 or move[1] == 7:
   #          reward += 5
         #lägg till så den koller för mest flippade movet också
    #     else:
     #        reward -= 2
 
-        if self.color == "Black":
-            reward += board.black_tiles - old_score
-        else:
-            reward += board.white_tiles - old_score
+        #if self.color == "Black":
+            #reward += board.black_tiles - old_score
+        #else:
+            #reward += board.white_tiles - old_score
 
         #if self.color == "Black":
             #score = board.black_tiles - board.white_tiles
@@ -142,8 +146,17 @@ def train_bot():
     record_white = 0
     FPS = 500
 
+    games_played = 0
+    black_wins = 0
+    white_wins = 0
+    draws = 0
+
     agent_black = Bot("Black")
     agent_white = Bot("White")
+    #agent_black.load_model("model/black_bot")
+    #agent_white.load_model("model/white_bot")
+    board = Board()
+    game_over = False
     board = Board()
     game_over = False
     #clock = pygame.time.Clock()
@@ -172,7 +185,14 @@ def train_bot():
             if valid_moves == []:#checks if game is over
                 game_over = True
 
-            agent_black.bot_trainer_short_memory(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
+            #Check if we leave a corner open
+            corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+            for corner in corners:
+                if corner in valid_moves:
+                    reward = -10
+                    break
+
+            agent_black.short_memory_trainer(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
             agent_black.remember(old_board, final_move, reward, next_board, game_over)#appends the game state, bot move and reward to memory
 
         else:
@@ -185,48 +205,78 @@ def train_bot():
             if valid_moves == []:
                 game_over = True
 
-            agent_white.bot_trainer_short_memory(old_board, final_move, reward, next_board, game_over)
+            corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+            for corner in corners:
+                if corner in valid_moves:
+                    reward = -10
+                    break
+
+            agent_white.short_memory_trainer(old_board, final_move, reward, next_board, game_over)
             agent_white.remember(old_board, final_move, reward, next_board, game_over)
 
         #pygame.display.update()
 
         if game_over:
+            games_played +=1
+
+            agent_black.memory
           
             black_score = board.black_tiles
             white_score = board.white_tiles
 
-            black_reward = 0
-            white_reward = 0
-
-
             if black_score > record_black:
                 record_black = black_score
-                agent_black.model.save("black_bot")
+                agent_black.model.save("black_bot_v2")
 
             if white_score > record_white:
                 record_white = white_score
-                agent_white.model.save("white_bot")
+                agent_white.model.save("white_bot_v2")
 
             if black_score > white_score:
-                black_reward = 100
-                white_reward = -100
+                black_wins += 1
+                
+                blacks_last_move = agent_black.memory[-1]
+                board_state, move, reward, next_board_state, game_over = blacks_last_move
+                agent_black.memory[-1] = (board_state, move, 100, next_board_state, game_over)
+
+                whites_last_move = agent_white.memory[-1]
+                board_state, move, reward, next_board_state, game_over = whites_last_move
+                agent_white.memory[-1] = (board_state, move, -100, next_board_state, game_over)
                 if black_won_last == False:
-                    agent_black.model.save("black_bot")
+                    agent_black.model.save("black_bot_v2")
                     black_won_last = True
 
-                print("BLACK WINS!")
+                #print("BLACK WINS")
             
             if white_score > black_score:
-                white_reward = 100
-                black_reward = -100
+                white_wins += 1
+                
+                blacks_last_move = agent_black.memory[-1]
+                board_state, move, reward, next_board_state, game_over = blacks_last_move
+                agent_black.memory[-1] = (board_state, move, -100, next_board_state, game_over)
+
+                whites_last_move = agent_white.memory[-1]
+                board_state, move, reward, next_board_state, game_over = whites_last_move
+                agent_white.memory[-1] = (board_state, move, 100, next_board_state, game_over)
+
                 if black_won_last == True:
-                    agent_white.model.save("white_bot")
+                    agent_white.model.save("white_bot_v2")
                     black_won_last = False
                 
-                print("WHITE WINS")
+                #print("WHITE WINS")
 
-            agent_black.remember(old_board, final_move, black_reward, next_board, game_over)
-            agent_white.remember(old_board, final_move, white_reward, next_board, game_over)
+            if white_score == black_score:
+                draws += 1
+
+                blacks_last_move = agent_black.memory[-1]
+                board_state, move, reward, next_board_state, game_over = blacks_last_move
+                agent_black.memory[-1] = (board_state, move, -50, next_board_state, game_over)
+
+                whites_last_move = agent_white.memory[-1]
+                board_state, move, reward, next_board_state, game_over = whites_last_move
+                agent_white.memory[-1] = (board_state, move, -50, next_board_state, game_over)
+
+                #print("DRAW")
 
             agent_black.game_iterations += 1
             agent_black.long_memory_trainer()
@@ -239,7 +289,16 @@ def train_bot():
             game_over = False
             board = Board()
             #pygame.display.update()
-            #print('Game:', agent.game_iterations, 'Score:', score, 'Record:', record)
+            print(games_played)
+
+            if games_played % 100 == 0:
+                print()
+                print("Amount of games: ", games_played)
+                print("Black Wins: ", black_wins)
+                print("White Wins: ", white_wins)
+                print("Draws: ", draws)
+
+            
 
 if __name__ == '__main__':
    train_bot()
