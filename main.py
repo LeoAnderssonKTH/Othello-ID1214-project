@@ -2,7 +2,7 @@ import pygame
 from othello.globals import SCREEN_WIDTH, SCREEN_HEIGHT, SQUARE_SIZE
 from othello.board import Board
 from bot import Bot, train_bot
-#SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Othello')
 import time
 import torch
@@ -20,13 +20,15 @@ def main():
     clock = pygame.time.Clock()
     board = Board()
 
-    #path_to_bot = "./model/black_bot"
+    path_to_bot = "./model/black_bot_v2"
 
-    #black_bot = Bot("Black")
+    black_bot = Bot("Black")
 
-    #black_bot.model.load_state_dict(torch.load(path_to_bot))
+    black_bot.model.load_state_dict(torch.load(path_to_bot))
 
-    #black_bot.model.eval()
+    black_bot.model.eval()
+
+    black_bot.epsilon = 0
     
     #print("Starting Board: ")
     #print(board.current_state)
@@ -36,7 +38,7 @@ def main():
     #valid_moves = board.valid_moves() # initialize valid_moves
     #toggle = 1
 
-    train_bot()
+    #train_bot()
 
     while run:
         clock.tick(FPS)

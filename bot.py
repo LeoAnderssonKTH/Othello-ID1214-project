@@ -14,7 +14,7 @@ LR = 0.001
 class Bot:
     def __init__(self, color):
         self.game_iterations = 0
-        self.epsilon = 100 # in oder to controll randomness
+        self.epsilon = 1 # in oder to controll randomness
         self.reward = 0.9
         self.color = color
         self.gamma = 0.9 #discount rate
@@ -162,6 +162,9 @@ def train_bot():
     record_white = 0
     FPS = 500
 
+    black_lose_streak = 0
+    white_lose_streak = 0
+
     games_played = 0
     black_wins = 0
     white_wins = 0
@@ -205,7 +208,7 @@ def train_bot():
             corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
             for corner in corners:
                 if corner in valid_moves:
-                    reward = -10
+                    reward -= 10
                     break
 
             agent_black.short_memory_trainer(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
@@ -225,7 +228,7 @@ def train_bot():
             corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
             for corner in corners:
                 if corner in valid_moves:
-                    reward = -10
+                    reward -= 10
                     break
 
             agent_white.short_memory_trainer(old_board, final_move, reward, next_board, game_over)
@@ -251,6 +254,8 @@ def train_bot():
 
             if black_score > white_score:
                 black_wins += 1
+                white_lose_streak += 1
+                black_lose_streak = 0
                 
                 blacks_last_move = agent_black.memory[-1]
                 board_state, move, reward, next_board_state, game_over = blacks_last_move
@@ -267,6 +272,8 @@ def train_bot():
             
             if white_score > black_score:
                 white_wins += 1
+                black_lose_streak += 1
+                white_lose_streak = 0
                 
                 blacks_last_move = agent_black.memory[-1]
                 board_state, move, reward, next_board_state, game_over = blacks_last_move
@@ -300,8 +307,16 @@ def train_bot():
             agent_white.game_iterations += 1
             agent_white.long_memory_trainer()
 
-            agent_black.epsilon = max(0.01, agent_black.epsilon * 0.995)  # Exponential decay
-            agent_white.epsilon = max(0.01, agent_white.epsilon * 0.995)
+            agent_black.epsilon = max(0.01, agent_black.epsilon * 0.9995)  # Exponential decay
+            agent_white.epsilon = max(0.01, agent_white.epsilon * 0.9995)
+
+            if black_lose_streak == 10 and agent_black.epsilon < 0.25:
+                black_lose_streak = 0
+                agent_black.epsilon = min(0.25, agent_black.epsilon + 0.05)
+
+            if white_lose_streak == 10 and agent_white.epsilon < 0.25:
+                white_lose_streak = 0
+                agent_white.epsilon = min(0.25, agent_white.epsilon + 0.05)
 
             game_over = False
             board = Board()
@@ -309,6 +324,9 @@ def train_bot():
             print(games_played)
 
             if games_played % 100 == 0:
+                print()
+                print("Black Epsilon :", agent_black.epsilon)
+                print("White Epsilon :", agent_white.epsilon)
                 print()
                 print("Amount of games: ", games_played)
                 print("Black Wins: ", black_wins)
