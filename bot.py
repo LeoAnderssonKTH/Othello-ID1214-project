@@ -21,18 +21,6 @@ class Bot:
         self.memory = deque(maxlen=MAX_MEMORY) # if we exeede memory we popleft()
         self.model = QNetwork(64, 128, 128, 64)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-        
-        #self.model = Linear_QNet(11,256,3)
-        #self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-
-    
-    #def get_board(self, board):
-        #nr_white_tiles = board.white_tiles
-        #nr_black_tiles = board.black_tiles
-        #current_board = board.current_state()
-        #return current_board
-        # valid moves
-        # current board
 
     def load_model(self, path):
         self.model.load_state_dict(torch.load(path))
@@ -61,14 +49,11 @@ class Bot:
         else:
             return 1
 
-
-
     def get_move(self, state, valid_moves, board):
         next_move = None
         best_score = -float('inf')
         #print(state)
 
-        
         #for move in valid_moves:
             #move_score = self.move_heuristics(move)
             #if move_score > best_score:
@@ -147,7 +132,6 @@ class Bot:
         
         return reward
 
-
     def set_reward(self, color, value):
         self.reward = value
         #print(color + " reward: " + str(self.reward))
@@ -224,7 +208,6 @@ def train_bot():
             if valid_moves == []:
                 game_over = True
 
-            #Check if we leave a corner open
             corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
             for corner in corners:
                 if corner in valid_moves:
