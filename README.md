@@ -10,5 +10,5 @@
 ###### python --version
 ###### pip --version
 
-##### To run the game, run the program from the main.py file.
+##### To run the game and play against one of the black bots, run the program from the main.py file.
 #
