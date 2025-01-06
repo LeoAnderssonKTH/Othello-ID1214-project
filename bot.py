@@ -9,7 +9,7 @@ import pygame
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-LR = 0.001
+LR = 0.01
 
 class Bot:
     def __init__(self, color):
@@ -148,6 +148,7 @@ def train_bot():
 
     black_lose_streak = 0
     white_lose_streak = 0
+    
 
     games_played = 0
     black_wins = 0
@@ -158,7 +159,7 @@ def train_bot():
     agent_white = Bot("White")
     #agent_black.load_model("model/black_bot")
     #agent_white.load_model("model/white_bot")
-    board = Board()
+    
     game_over = False
     board = Board()
     game_over = False
@@ -316,7 +317,184 @@ def train_bot():
                 print("White Wins: ", white_wins)
                 print("Draws: ", draws)
 
+def train_bot_random():
+    scores_black = [] # for plotting progress
+    scores_white = [] # for plotting progress
+
+    black_won_last = False
+
+    record_black = 0
+    record_white = 0
+    FPS = 500
+
+    black_lose_streak = 0
+    white_lose_streak = 0
+
+    black_best_winrate = 0
+
+    games_played = 0
+    black_wins = 0
+    white_wins = 0
+    draws = 0
+   
+
+
+    agent_black = Bot("Black")
+    #agent_white = Bot("White")
+    #agent_black.load_model("model/black_bot_v3")
+    #agent_black.epsilon = 0.5
+    #agent_white.load_model("model/white_bot")
+    board = Board()
+    game_over = False
+    
+    
+    #clock = pygame.time.Clock()
+    run = True
+
+    while run:
+        
+        #clock.tick(FPS)
+        #for event in pygame.event.get():
+            #if event.type == pygame.QUIT:
+                #run = False
+        
+        #board.draw_tiles(screen)
+        # get old state
+        old_board = board.current_state()
+
+        # get move
+        valid_moves = board.valid_moves()
+        #board.print_moves(valid_moves, screen)
+
+        if board.blacks_turn:
+            final_move = agent_black.get_move(old_board, valid_moves, board)#gets a move based on heuristics
+            reward = agent_black.move(final_move, board)#makes a move and gets the reward and score from the move made
+            next_board = board.current_state()#gets updates board after move
+            
+            valid_moves = board.valid_moves()#updates valid_moves after bot's move
+            if valid_moves == []:#checks if game is over
+                game_over = True
+
+
+            agent_black.short_memory_trainer(old_board, final_move, reward, next_board, game_over)# trains the bots short memory
+            agent_black.remember(old_board, final_move, reward, next_board, game_over)#appends the game state, bot move and reward to memory
+
+        else:
+            move = None
+            #time.sleep(2)
+            corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+            for corner in corners:
+                if corner in valid_moves:
+                    move = corner
+                    break
+                
+            if move:
+                board.make_move(move[0], move[1])
+            else:
+                move = random.choice(valid_moves)
+                board.make_move(move[0], move[1])
+
+            valid_moves = board.valid_moves()#updates valid_moves after bot's move
+            if valid_moves == []:#checks if game is over
+                
+                game_over = True
+                
+
+
+        #pygame.display.update()
+
+        if game_over:
+            games_played +=1
+
+            agent_black.memory
+          
+            black_score = board.black_tiles
+            white_score = board.white_tiles
+
+
+            if black_score > white_score:
+                black_wins += 1
+                white_lose_streak += 1
+                black_lose_streak = 0
+                
+                blacks_last_move = agent_black.memory[-1]
+                board_state, move, reward, next_board_state, bot_memory_game_over = blacks_last_move
+                agent_black.memory[-1] = (board_state, move, 100, next_board_state, True)
+
+
+                #print("BLACK WINS")
+            
+            if white_score > black_score:
+                white_wins += 1
+                black_lose_streak += 1
+                white_lose_streak = 0
+                
+                blacks_last_move = agent_black.memory[-1]
+                board_state, move, reward, next_board_state, bot_memory_game_over = blacks_last_move
+                agent_black.memory[-1] = (board_state, move, -100, next_board_state, True)
+
+                
+                #print("WHITE WINS")
+
+            if white_score == black_score:
+                draws += 1
+
+                blacks_last_move = agent_black.memory[-1]
+                board_state, move, reward, next_board_state, bot_memory_game_over = blacks_last_move
+                agent_black.memory[-1] = (board_state, move, -50, next_board_state, True)
+
+
+                #print("DRAW")
+
+            agent_black.game_iterations += 1
+            agent_black.long_memory_trainer()
+           
+            
+            if games_played < 10000:
+                agent_black.epsilon = max(0.1, agent_black.epsilon - 0.00001)
+            elif games_played < 15000:
+                agent_black.epsilon = max(0.05, agent_black.epsilon - 0.0001)
+            else:
+                agent_black.epsilon = max(0.01, agent_black.epsilon - 0.001)
+           
+
+            if black_lose_streak == 10 and agent_black.epsilon < 0.3:
+                black_lose_streak = 0
+                agent_black.epsilon = min(0.3, agent_black.epsilon + 0.1)
+
+            game_over = False
+            board = Board()
+            #pygame.display.update()
+            print(games_played)
+
+            if games_played % 100 == 0:
+
+                current_winrate = black_wins / 100
+
+                if black_best_winrate < current_winrate and games_played > 10000 and agent_black.epsilon < 0.35:
+                    black_best_winrate = current_winrate
+                    agent_black.model.save("black_bot_v5")
+
+                if current_winrate < 0.5 and agent_black.epsilon < 0.3:
+                    agent_black.epsilon = min(0.3, agent_black.epsilon + 0.1)
+
+
+                print()
+                print("Black Epsilon :", agent_black.epsilon)
+                print()
+                print("Amount of games: ", games_played)
+                print("Stats for the last 100 games")
+                print("Black Wins: ", black_wins)
+                print("White Wins: ", white_wins)
+                print("Draws: ", draws)      
+                print("Black Winrate: ", current_winrate)
+
+                black_wins = 0
+                white_wins = 0
+                draws = 0     
+
             
 
 if __name__ == '__main__':
    train_bot()
+   train_bot_random()

@@ -1,11 +1,12 @@
 import pygame
 from othello.globals import SCREEN_WIDTH, SCREEN_HEIGHT, SQUARE_SIZE
 from othello.board import Board
-from bot import Bot, train_bot
+from bot import Bot, train_bot, train_bot_random
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Othello')
 import time
 import torch
+import random
 
 FPS = 20
 
@@ -20,7 +21,7 @@ def main():
     clock = pygame.time.Clock()
     board = Board()
 
-    path_to_bot = "./model/black_bot_v2"
+    path_to_bot = "./model/black_bot_v3"
 
     black_bot = Bot("Black")
 
@@ -29,6 +30,9 @@ def main():
     black_bot.model.eval()
 
     black_bot.epsilon = 0
+
+    games_played = 0
+    black_wins = 0
     
     #print("Starting Board: ")
     #print(board.current_state)
@@ -39,6 +43,7 @@ def main():
     #toggle = 1
 
     #train_bot()
+    #train_bot_random()
 
     while run:
         clock.tick(FPS)
@@ -51,9 +56,13 @@ def main():
         
         # Play versus bot 
         if board.blacks_turn:
-            time.sleep(2)
+            time.sleep(1)
             move = black_bot.get_move(current_state, valid_moves, board)
             black_bot.move(move, board)
+        #else:
+            #move = random.choice(valid_moves)
+            #time.sleep(2)
+            #board.make_move(move[0], move[1])
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -106,8 +115,10 @@ def main():
         if valid_moves == []:
             print("Black Tiles: ", board.black_tiles)
             print("White Tiles: ", board.white_tiles)
+            games_played += 1
 
             if board.black_tiles > board.white_tiles:
+                black_wins += 1
                 print("Black Wins!")
                 #bot1.set_reward("white", 10)
                 #bot2.set_reward("black", -10)
@@ -115,8 +126,12 @@ def main():
                 print("White Wins!")
                 #bot2.set_reward("white", 10)
                 #bot1.set_reward("black", -10)
-            print("Restarting Game in 5 seconds")
-            time.sleep(5)
+
+            print()
+            #print("Black Bot Winrate is: ", black_wins/games_played)
+            print()
+            print("Restarting Game")
+            #time.sleep(5)
             #frame_iterations = 0 # resets the frame iterations
             board = Board()
             valid_moves = board.valid_moves()
